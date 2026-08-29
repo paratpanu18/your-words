@@ -7,7 +7,7 @@ import {
 import { hasRoomAccess } from "@/lib/auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
-const MAX_LENGTH = 75;
+const MAX_LENGTH = 150;
 
 export async function GET(
   request: Request,

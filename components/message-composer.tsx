@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { MessageCircleHeart, PauseCircle, Send, XCircle } from "lucide-react";
 
-const MAX_LENGTH = 75;
+const MAX_LENGTH = 150;
 
 interface ComposerProps {
   code: string;
@@ -109,7 +109,7 @@ export function MessageComposer({
               />
               <span
                 className={`pointer-events-none absolute bottom-3 right-4 text-xs tabular-nums ${
-                  remaining <= 20 ? "text-amber-600" : "text-neutral-400"
+                  remaining <= 40 ? "text-amber-600" : "text-neutral-400"
                 }`}
               >
                 {text.length}/{MAX_LENGTH}

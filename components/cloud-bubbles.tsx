@@ -95,17 +95,30 @@ export function computePlacement(
   return best;
 }
 
+/** Text font scales down as the message gets longer, and long messages
+ * wrap at a fixed character budget so the cloud keeps its proportions. */
+function cloudFontPx(basePx: number, text: string): number {
+  const mult = Math.min(1.18, Math.max(0.62, Math.sqrt(50 / text.length)));
+  return Math.max(11, Math.round(basePx * mult));
+}
+
+function cloudChCap(text: string): number {
+  return text.length <= 36 ? 36 : 26;
+}
+
 /** ... CloudShape from before, unchanged ... */
 function CloudShape({
   theme,
   fontPx,
   text,
   uid,
+  chCap,
 }: {
   theme: (typeof CLOUD_THEMES)[number];
   fontPx: number;
   text: string;
   uid: number;
+  chCap: number;
 }) {
   const gradId = `cloud-grad-${uid}`;
   const clipId = `cloud-clip-${uid}`;
@@ -147,7 +160,10 @@ function CloudShape({
         </g>
       </svg>
 
-      <div className="relative flex min-h-[4.8em] min-w-[8em] items-center justify-center px-[1.9em] pt-[1.9em] pb-[1em] text-center">
+      <div
+        className="relative flex min-h-[4.8em] min-w-[8em] items-center justify-center px-[1.9em] pt-[1.9em] pb-[1em] text-center"
+        style={{ maxWidth: `${chCap}ch` }}
+      >
         <p
           className="break-words font-semibold leading-snug [text-shadow:0_1px_0_rgba(255,255,255,0.7)]"
           style={{ color: theme.text }}
@@ -166,14 +182,11 @@ export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
   const layout = useMemo(() => {
     if (count === 0) return { fontPx: 28, maxW: 40 };
     const scale = Math.max(0.55, Math.min(1.5, 1.45 - count / 55));
-    const avgLen = visible.reduce((acc, m) => acc + m.text.length, 0) / count;
-    const fontPx = Math.round(
-      Math.min(30, 17 * scale) * (avgLen > 60 ? 0.85 : avgLen > 35 ? 0.95 : 1),
-    );
+    const fontPx = Math.round(Math.min(30, 17 * scale));
     // Max width per cloud shrinks gently as the sky fills up.
     const maxW = Math.max(16, Math.min(44, 96 / Math.sqrt(count + 1)));
     return { fontPx, maxW };
-  }, [count, visible]);
+  }, [count]);
 
   return (
     <div className="relative h-full w-full">
@@ -183,6 +196,11 @@ export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
           const r = (shift: number) => ((h >> shift) % 1000) / 1000;
 
           const pos = { left: m.left, top: m.top };
+
+          // Dynamic text sizing: shorter messages render larger, longer
+          // ones shrink and wrap so the cloud keeps its proportions.
+          const fontPx = cloudFontPx(layout.fontPx, m.text);
+          const chCap = cloudChCap(m.text);
 
           // Natural depth: clouds lower on screen are nearer -> slightly
           // bigger and layered in front, like a real sky.
@@ -230,9 +248,10 @@ export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
                 >
                   <CloudShape
                     theme={theme}
-                    fontPx={layout.fontPx}
+                    fontPx={fontPx}
                     text={m.text}
                     uid={m.id}
+                    chCap={chCap}
                   />
                 </motion.div>
               </motion.div>
