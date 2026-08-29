@@ -266,3 +266,50 @@ export function countMessages(roomId: number): number {
     .get(roomId) as { n: number };
   return row.n;
 }
+
+/* ---------------- app settings ---------------- */
+
+export interface RateLimitSettings {
+  enabled: boolean;
+  limit: number;
+  windowMs: number;
+}
+
+export const DEFAULT_RATE_LIMIT_SETTINGS: RateLimitSettings = {
+  enabled: false,
+  limit: 10,
+  windowMs: 60_000,
+};
+
+const RATE_LIMIT_KEY = "rate_limit";
+
+export function getRateLimitSettings(): RateLimitSettings {
+  const row = getDb()
+    .prepare("SELECT value FROM settings WHERE key = ?")
+    .get(RATE_LIMIT_KEY) as { value: string } | undefined;
+  if (!row) return DEFAULT_RATE_LIMIT_SETTINGS;
+  try {
+    const parsed = JSON.parse(row.value) as Partial<RateLimitSettings>;
+    return {
+      enabled: parsed.enabled === true,
+      limit:
+        typeof parsed.limit === "number" && parsed.limit >= 1
+          ? Math.floor(parsed.limit)
+          : DEFAULT_RATE_LIMIT_SETTINGS.limit,
+      windowMs:
+        typeof parsed.windowMs === "number" && parsed.windowMs >= 1000
+          ? Math.floor(parsed.windowMs)
+          : DEFAULT_RATE_LIMIT_SETTINGS.windowMs,
+    };
+  } catch {
+    return DEFAULT_RATE_LIMIT_SETTINGS;
+  }
+}
+
+export function updateRateLimitSettings(settings: RateLimitSettings): void {
+  getDb()
+    .prepare(
+      "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+    )
+    .run(RATE_LIMIT_KEY, JSON.stringify(settings));
+}

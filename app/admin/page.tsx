@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { MessageCircleHeart } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
+import { RateLimitSettingsCard } from "@/components/rate-limit-settings";
 import { RoomsClient } from "@/components/rooms-client";
 import { getCurrentAdmin } from "@/lib/auth";
-import { listRooms } from "@/lib/queries";
+import { getRateLimitSettings, listRooms } from "@/lib/queries";
 
 export const metadata: Metadata = { title: "Rooms" };
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export default async function AdminPage() {
   if (!admin) redirect("/admin/login");
 
   const rooms = listRooms();
+  const rateLimitSettings = getRateLimitSettings();
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
@@ -31,6 +33,10 @@ export default async function AdminPage() {
       </header>
 
       <RoomsClient rooms={rooms} />
+
+      <div className="mt-10">
+        <RateLimitSettingsCard settings={rateLimitSettings} />
+      </div>
     </div>
   );
 }

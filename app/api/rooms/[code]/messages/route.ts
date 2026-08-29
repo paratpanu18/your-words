@@ -5,7 +5,7 @@ import {
   listMessagesAfter,
 } from "@/lib/queries";
 import { hasRoomAccess } from "@/lib/auth";
-import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { sendMessageRateLimit } from "@/lib/rate-limit";
 
 const MAX_LENGTH = 150;
 
@@ -38,7 +38,7 @@ export async function POST(
   { params }: { params: Promise<{ code: string }> },
 ) {
   const { code } = await params;
-  if (!rateLimit(`send:${clientIp(request)}`, 10, 60_000)) {
+  if (!sendMessageRateLimit(request)) {
     return NextResponse.json(
       { error: "You are sending messages too fast. Please wait a moment." },
       { status: 429 },
