@@ -10,14 +10,19 @@ export interface CloudMessage {
   top: number;
 }
 
+// Solid pastel fills with near-black text for maximum readability.
 const CLOUD_THEMES = [
-  { from: "#ffffff", to: "#ffd6df", text: "#8a4b5c" }, // blush
-  { from: "#ffffff", to: "#bfe3ff", text: "#3d6b8f" }, // sky
-  { from: "#ffffff", to: "#ffe8ee", text: "#96606f" }, // light blush
-  { from: "#ffffff", to: "#d9edff", text: "#4a729a" }, // light sky
-  { from: "#ffffff", to: "#e6dcff", text: "#6b5a96" }, // lavender
-  { from: "#ffffff", to: "#d3f4e4", text: "#3f7d61" }, // mint
+  { bg: "#ffd7de" }, // blush
+  { bg: "#b4dfff" }, // sky
+  { bg: "#ffe4ea" }, // light blush
+  { bg: "#d8ecff" }, // light sky
+  { bg: "#e6dcff" }, // lavender
+  { bg: "#d3f4e4" }, // mint
 ];
+
+const CLOUD_TEXT = "#2a2a33";
+const CLOUD_FONT =
+  "var(--font-google-sans), var(--font-anuphan), system-ui, sans-serif";
 
 const MAX_BUBBLES = 60;
 
@@ -111,18 +116,13 @@ function CloudShape({
   theme,
   fontPx,
   text,
-  uid,
   chCap,
 }: {
   theme: (typeof CLOUD_THEMES)[number];
   fontPx: number;
   text: string;
-  uid: number;
   chCap: number;
 }) {
-  const gradId = `cloud-grad-${uid}`;
-  const clipId = `cloud-clip-${uid}`;
-
   const shapes = (
     <>
       <rect x="8" y="50" width="204" height="92" rx="46" />
@@ -135,29 +135,12 @@ function CloudShape({
   return (
     <div className="relative" style={{ fontSize: `${fontPx}px` }}>
       <svg
-        className="absolute inset-0 h-full w-full drop-shadow-[0_14px_28px_rgba(120,150,190,0.35)]"
+        className="absolute inset-0 h-full w-full drop-shadow-[0_8px_16px_rgba(120,150,190,0.30)]"
         viewBox="0 0 220 150"
         preserveAspectRatio="none"
         aria-hidden="true"
       >
-        <defs>
-          <linearGradient
-            id={gradId}
-            gradientUnits="userSpaceOnUse"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="150"
-          >
-            <stop offset="0%" stopColor={theme.from} />
-            <stop offset="100%" stopColor={theme.to} />
-          </linearGradient>
-          <clipPath id={clipId}>{shapes}</clipPath>
-        </defs>
-        <g fill={`url(#${gradId})`}>{shapes}</g>
-        <g clipPath={`url(#${clipId})`}>
-          <ellipse cx="100" cy="40" rx="78" ry="30" fill="#ffffff" opacity="0.5" />
-        </g>
+        <g fill={theme.bg}>{shapes}</g>
       </svg>
 
       <div
@@ -165,8 +148,8 @@ function CloudShape({
         style={{ maxWidth: `${chCap}ch` }}
       >
         <p
-          className="break-words font-semibold leading-snug [text-shadow:0_1px_0_rgba(255,255,255,0.7)]"
-          style={{ color: theme.text }}
+          className="break-words font-semibold leading-snug"
+          style={{ color: CLOUD_TEXT, fontFamily: CLOUD_FONT }}
         >
           {text}
         </p>
@@ -218,7 +201,6 @@ export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
                 top: `${pos.top}%`,
                 zIndex: Math.round(pos.top * 10),
                 maxWidth: `${layout.maxW}%`,
-                willChange: "transform, opacity",
               }}
               initial={{ x: "-50%", y: "-50%", opacity: 0, scale: 0.3 }}
               animate={{ x: "-50%", y: "-50%", opacity: 1, scale: depth }}
@@ -250,7 +232,6 @@ export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
                     theme={theme}
                     fontPx={fontPx}
                     text={m.text}
-                    uid={m.id}
                     chCap={chCap}
                   />
                 </motion.div>

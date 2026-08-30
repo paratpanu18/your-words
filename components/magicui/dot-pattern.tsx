@@ -9,6 +9,8 @@ interface DotPatternProps extends React.SVGProps<SVGSVGElement> {
   cx?: number;
   cy?: number;
   cr?: number;
+  /** Mouse parallax; disable on pages with many animated layers. */
+  interactive?: boolean;
 }
 
 export function DotPattern({
@@ -17,6 +19,7 @@ export function DotPattern({
   cx = 1,
   cy = 1,
   cr = 1,
+  interactive = true,
   className,
   ...props
 }: DotPatternProps) {
@@ -24,6 +27,7 @@ export function DotPattern({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (!interactive) return;
     const handleMouseMove = (event: MouseEvent) => {
       const rect = document.body.getBoundingClientRect();
       const x = (event.clientX - rect.width / 2) / 40;
@@ -32,7 +36,7 @@ export function DotPattern({
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [interactive]);
 
   return (
     <svg

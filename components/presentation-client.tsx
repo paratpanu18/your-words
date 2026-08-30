@@ -164,6 +164,7 @@ export function PresentationClient({
         cx={1.5}
         cy={1.5}
         cr={1.5}
+        interactive={false}
         className="fill-sky-deep/15 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]"
       />
 
@@ -201,7 +202,7 @@ export function PresentationClient({
               type="button"
               onClick={copyLink}
               title="Copy room link"
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-white/70 px-3 text-sm text-neutral-500 backdrop-blur transition-colors hover:bg-white"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-white/90 px-3 text-sm text-neutral-500 transition-colors hover:bg-white"
             >
               <Link2 className="h-4 w-4" />
               {copied ? "Copied" : "Link"}
@@ -214,7 +215,7 @@ export function PresentationClient({
                   : document.documentElement.requestFullscreen()
               }
               title="Toggle fullscreen"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200/80 bg-white/70 text-neutral-500 backdrop-blur transition-colors hover:bg-white"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200/80 bg-white/90 text-neutral-500 transition-colors hover:bg-white"
             >
               {fullscreen ? (
                 <Minimize className="h-4 w-4" />
@@ -270,7 +271,7 @@ export function PresentationClient({
       </main>
 
       {status !== "open" && (
-        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 bg-[#2a2a33]/85 py-3 text-sm text-white backdrop-blur">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 bg-[#2a2a33]/90 py-3 text-sm text-white">
           {status === "paused" ? (
             <>
               <PauseCircle className="h-4 w-4" />
