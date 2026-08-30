@@ -8,16 +8,25 @@ import {
   useSyncExternalStore,
 } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Link2, Maximize, Minimize, PauseCircle, XCircle } from "lucide-react";
+import {
+  Link2,
+  Maximize,
+  Minimize,
+  PauseCircle,
+  X,
+  XCircle,
+} from "lucide-react";
 import {
   CloudBubbles,
+  CloudShape,
+  cloudThemeFor,
   computePlacement,
   type CloudMessage,
 } from "@/components/cloud-bubbles";
 import { DotPattern } from "@/components/magicui/dot-pattern";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { SparklesText } from "@/components/magicui/sparkles-text";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 interface PresentationClientProps {
   code: string;
@@ -50,6 +59,7 @@ export function PresentationClient({
   const [realtime, setRealtime] = useState(initialRealtime);
   const [fullscreen, setFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [reading, setReading] = useState<CloudMessage | null>(null);
   const lastIdRef = useRef(
     initialMessages.length > 0
       ? initialMessages[initialMessages.length - 1].id
@@ -145,6 +155,15 @@ export function PresentationClient({
     document.addEventListener("fullscreenchange", handler);
     return () => document.removeEventListener("fullscreenchange", handler);
   }, []);
+
+  useEffect(() => {
+    if (!reading) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setReading(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [reading]);
 
   async function copyLink() {
     try {
@@ -251,12 +270,12 @@ export function PresentationClient({
       </header>
 
       {messages.length > 0 && (
-        <div className="pointer-events-none absolute inset-0 z-0">
-          <CloudBubbles messages={messages} />
+        <div className="absolute inset-0 z-0">
+          <CloudBubbles messages={messages} onSelect={setReading} />
         </div>
       )}
 
-      <main className="relative z-10 flex-1 px-8 pb-8">
+      <main className="pointer-events-none relative z-10 flex-1 px-8 pb-8">
         {messages.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-neutral-400">
             <p className="text-xl font-medium text-neutral-500">
@@ -285,6 +304,50 @@ export function PresentationClient({
           )}
         </div>
       )}
+
+      {/* reading overlay: click a cloud to enlarge it */}
+      <AnimatePresence>
+        {reading && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center p-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setReading(null)}
+          >
+            <div className="absolute inset-0 bg-[#2a2a33]/60" />
+            <motion.div
+              className="relative z-10 cursor-pointer"
+              role="button"
+              aria-label="Close enlarged message"
+              initial={{ scale: 0.5, opacity: 0, y: 40 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.6, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 22 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CloudShape
+                theme={cloudThemeFor(reading.id)}
+                fontPx={38}
+                text={reading.text}
+                chCap={26}
+              />
+            </motion.div>
+            <button
+              type="button"
+              onClick={() => setReading(null)}
+              className="relative z-10 mt-8 inline-flex h-10 items-center gap-2 rounded-full bg-white/90 px-5 text-sm font-medium text-[#2a2a33] transition-colors hover:bg-white"
+            >
+              <X className="h-4 w-4" />
+              Close
+            </button>
+            <p className="relative z-10 mt-3 text-xs text-white/60">
+              Click anywhere or press Esc to close
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

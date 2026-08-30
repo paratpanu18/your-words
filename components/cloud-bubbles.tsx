@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 export interface CloudMessage {
@@ -111,7 +111,7 @@ function cloudChCap(text: string): number {
 }
 
 /** ... CloudShape from before, unchanged ... */
-function CloudShape({
+export function CloudShape({
   theme,
   fontPx,
   text,
@@ -157,9 +157,22 @@ function CloudShape({
   );
 }
 
-export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
+/** Theme (solid pastel) for a given message id — used by clouds and the
+ * reading overlay so both always match. */
+export function cloudThemeFor(id: number): (typeof CLOUD_THEMES)[number] {
+  return CLOUD_THEMES[hashString(String(id)) % CLOUD_THEMES.length];
+}
+
+export function CloudBubbles({
+  messages,
+  onSelect,
+}: {
+  messages: CloudMessage[];
+  onSelect?: (message: CloudMessage) => void;
+}) {
   const visible = useMemo(() => messages.slice(-MAX_BUBBLES), [messages]);
   const count = visible.length;
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   const layout = useMemo(() => {
     if (count === 0) return { fontPx: 28, maxW: 40 };
@@ -194,15 +207,21 @@ export function CloudBubbles({ messages }: { messages: CloudMessage[] }) {
           return (
             <motion.div
               key={m.id}
-              className="absolute"
+              className="absolute cursor-pointer"
+              role="button"
+              aria-label={`Read message: ${m.text.slice(0, 50)}`}
               style={{
                 left: `${pos.left}%`,
                 top: `${pos.top}%`,
-                zIndex: Math.round(pos.top * 10),
+                zIndex: hoveredId === m.id ? 10000 : Math.round(pos.top * 10),
                 maxWidth: `${layout.maxW}%`,
               }}
               initial={{ x: "-50%", y: "-50%", opacity: 0, scale: 0.3 }}
               animate={{ x: "-50%", y: "-50%", opacity: 1, scale: depth }}
+              whileHover={{ scale: depth * 1.1 }}
+              onHoverStart={() => setHoveredId(m.id)}
+              onHoverEnd={() => setHoveredId((cur) => (cur === m.id ? null : cur))}
+              onClick={() => onSelect?.(m)}
               exit={{
                 opacity: 0,
                 scale: 0.4,
