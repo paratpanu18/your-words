@@ -21,8 +21,7 @@ const CLOUD_THEMES = [
 ];
 
 const CLOUD_TEXT = "#2a2a33";
-const CLOUD_FONT =
-  "var(--font-google-sans), var(--font-anuphan), system-ui, sans-serif";
+const CLOUD_FONT = "var(--font-google-sans), system-ui, sans-serif";
 
 const MAX_BUBBLES = 60;
 

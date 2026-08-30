@@ -15,7 +15,7 @@
   --color-sky: #b4dfff;
   --color-sky-soft: #eef7ff;
   --color-sky-deep: #8ec8f2;
-  --font-sans: var(--font-anuphan);
+  --font-sans: var(--font-google-sans);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -32,7 +32,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-anuphan), system-ui, sans-serif;
+  font-family: var(--font-google-sans), system-ui, sans-serif;
 }
 
 button:not(:disabled),

@@ -1,17 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Anuphan, DM_Sans, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Google_Sans } from "next/font/google";
 import "./globals.css";
 
-const anuphan = Anuphan({
-  variable: "--font-anuphan",
-  subsets: ["latin", "thai"],
-});
-
-// Google Sans is proprietary and not available on Google Fonts; DM Sans is
-// the closest free typeface and is used for the cloud bubble text.
-const dmSans = DM_Sans({
+// Google Sans (incl. Thai subset) — the site-wide font, and the font used
+// for the cloud bubble text.
+const googleSans = Google_Sans({
   variable: "--font-google-sans",
-  subsets: ["latin"],
+  subsets: ["latin", "thai"],
 });
 
 const geistMono = Geist_Mono({
@@ -37,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${anuphan.variable} ${dmSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${googleSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-paper text-foreground">
         {children}
